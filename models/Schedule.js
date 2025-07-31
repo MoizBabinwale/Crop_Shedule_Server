@@ -13,7 +13,7 @@ const scheduleSchema = new mongoose.Schema({
   products: [
     {
       name: String,
-      quantity: Number,
+      quantity: String,
     },
   ],
   instructions: String,

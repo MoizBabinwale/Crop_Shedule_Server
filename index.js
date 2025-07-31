@@ -9,7 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 const scheduleRoutes = require("./routes/ScheduleRoutes.js");
+const cropRoutes = require("./routes/cropRoutes.js");
+const productRoutes = require("./routes/productRoutes.js");
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/crop", cropRoutes);
+app.use("/api/products", productRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is up and running!");
