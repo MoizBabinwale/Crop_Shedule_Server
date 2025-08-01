@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Crop = require("../models/Crop");
+const Schedule = require("../models/Schedule");
 
 // POST - Add new crop
 router.post("/add", async (req, res) => {
@@ -41,13 +42,22 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to update crop" });
   }
 });
-
+// DELETE - Delete a crop and its schedules
 router.delete("/:id", async (req, res) => {
   try {
-    await Crop.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted" });
+    const cropId = req.params.id;
+
+    // Delete the crop
+    await Crop.findByIdAndDelete(cropId);
+
+    // Delete associated schedules
+    await Schedule.deleteOne({ cropId }); // ❗ use deleteOne if 1 schedule per crop
+    // use deleteMany({ cropId }) if you had multiple schedules per crop
+
+    res.json({ message: "Crop and associated schedule deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting product" });
+    console.error("Error deleting crop and schedule:", error);
+    res.status(500).json({ error: "Error deleting crop and schedule" });
   }
 });
 module.exports = router;
