@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    console.log("Incoming product: ", req.body);
     const { name } = req.body;
     if (!name || name.trim() === "") {
       return res.status(400).json({ error: "Product name is required" });
@@ -15,7 +14,6 @@ router.post("/", async (req, res) => {
     const newProduct = new Product({ name: name.trim() });
     const savedProduct = await newProduct.save();
 
-    console.log("Saved product:", savedProduct);
     res.status(201).json(savedProduct);
   } catch (error) {
     console.error("Error adding product:", error);
@@ -26,8 +24,6 @@ router.post("/", async (req, res) => {
 // Get All Products (no crop relation)
 router.get("/", async (req, res) => {
   try {
-    console.log("get prod");
-
     const products = await Product.find();
     res.json(products);
   } catch (error) {

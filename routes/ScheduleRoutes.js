@@ -7,7 +7,6 @@ const Schedule = require("../models/Schedule");
 router.get("/get/:cropId", async (req, res) => {
   try {
     const cropId = req.params.cropId;
-    console.log("cropId ", cropId);
     const schedule = await Schedule.findOne({ cropId });
 
     if (!schedule) {
