@@ -2,12 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Crop = require("../models/Crop");
 const Schedule = require("../models/Schedule");
+const Quotation = require("../models/Quotation");
 
 // POST - Add new crop
 router.post("/add", async (req, res) => {
   try {
-    console.log("dd ", req.body);
-
     const { name, weeks } = req.body;
     const newCrop = new Crop({ name, weeks });
     await newCrop.save();
@@ -17,23 +16,81 @@ router.post("/add", async (req, res) => {
   }
 });
 
-// GET - Get all crops
+// ==============================
+// ✅ QUOTATION ROUTES (STATIC)
+// ==============================
+
+// GET all quotations
+router.get("/quotations", async (req, res) => {
+  try {
+    const quotations = await Quotation.find();
+    res.json(quotations);
+  } catch (error) {
+    console.error("Error fetching quotations:", error);
+    res.status(500).json({ error: "Error fetching quotations" });
+  }
+});
+
+// GET single quotation
+router.get("/quotations/:id", async (req, res) => {
+  try {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) return res.status(404).json({ error: "Quotation not found" });
+    res.json(quotation);
+  } catch (err) {
+    console.error("Fetch quotation failed:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// POST - Create new quotation
+router.post("/quotations", async (req, res) => {
+  try {
+    const quotation = await Quotation.create(req.body);
+    res.status(201).json(quotation);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create quotation" });
+  }
+});
+// DELETE - Delete a crop and its schedules
+router.delete("/quotations/:id", async (req, res) => {
+  try {
+    const quotationId = req.params.id;
+    await Quotation.findByIdAndDelete(quotationId);
+    res.json({ message: "Quotation deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting Quotation:", error);
+    res.status(500).json({ error: "Error deleting Quotation" });
+  }
+});
+
+// ===========================
+// ✅ CROP ROUTES (DYNAMIC)
+// ===========================
+
+// GET all crops
 router.get("/", async (req, res) => {
   try {
-    console.log("get  vrop");
-
     const crops = await Crop.find();
-    console.log("crops ", crops);
-
     res.json(crops);
   } catch (error) {
-    console.log("erro ", error);
-
+    console.error("Error fetching crops:", error);
     res.status(500).json({ error: "Error fetching crops" });
   }
 });
 
-// Update a crop
+// GET single crop
+router.get("/:id", async (req, res) => {
+  try {
+    const crop = await Crop.findById(req.params.id);
+    if (!crop) return res.status(404).json({ message: "Crop not found" });
+    res.json(crop);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching crop", error });
+  }
+});
+
+// PUT - Update a crop
 router.put("/:id", async (req, res) => {
   try {
     const updatedCrop = await Crop.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -42,33 +99,17 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to update crop" });
   }
 });
+
 // DELETE - Delete a crop and its schedules
 router.delete("/:id", async (req, res) => {
   try {
     const cropId = req.params.id;
-
-    // Delete the crop
     await Crop.findByIdAndDelete(cropId);
-
-    // Delete associated schedules
-    await Schedule.deleteOne({ cropId }); // ❗ use deleteOne if 1 schedule per crop
-    // use deleteMany({ cropId }) if you had multiple schedules per crop
-
+    await Schedule.deleteOne({ cropId }); // or deleteMany if multiple schedules per crop
     res.json({ message: "Crop and associated schedule deleted successfully" });
   } catch (error) {
     console.error("Error deleting crop and schedule:", error);
     res.status(500).json({ error: "Error deleting crop and schedule" });
-  }
-});
-
-// GET /crop/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const crop = await Crop.findById(req.params.id);
-    if (!crop) return res.status(404).json({ message: "Crop not found" });
-    res.json(crop);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching crop", error });
   }
 });
 

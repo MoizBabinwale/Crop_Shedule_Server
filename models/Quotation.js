@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 
-const scheduleSchema = new mongoose.Schema({
+const quotationSchema = new mongoose.Schema({
   cropId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Crop",
     required: true,
   },
+  cropName: String,
+  acres: Number,
   weeks: [
     {
       weekNumber: Number,
@@ -17,15 +19,15 @@ const scheduleSchema = new mongoose.Schema({
       productAmountMg: String,
       productAmountLtr: String,
       useStartDay: String,
+      instructions: String,
       products: [
         {
           name: String,
           quantity: String,
         },
       ],
-      instructions: String,
     },
   ],
 });
 
-module.exports = mongoose.model("Schedule", scheduleSchema);
+module.exports = mongoose.model("Quotation", quotationSchema);
