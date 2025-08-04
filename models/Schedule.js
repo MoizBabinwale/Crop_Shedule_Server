@@ -26,6 +26,12 @@ const scheduleSchema = new mongoose.Schema({
       instructions: String,
     },
   ],
+
+  scheduleBillId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ScheduleBill",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("Schedule", scheduleSchema);

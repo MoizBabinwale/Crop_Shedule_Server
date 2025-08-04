@@ -50,4 +50,34 @@ router.post("/create/:cropId", async (req, res) => {
   }
 });
 
+router.post("/schedulebill/create", async (req, res) => {
+  try {
+    const newBill = new ScheduleBill(req.body);
+    const saved = await newBill.save();
+
+    // Optionally update the related schedule with bill ID
+    await Schedule.findByIdAndUpdate(req.body.scheduleId, { scheduleBillId: saved._id });
+
+    res.status(200).json(saved);
+  } catch (err) {
+    res.status(500).json({ error: "Schedule bill creation failed" });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const scheduleId = req.params.id;
+
+    const schedule = await Schedule.findById(scheduleId).populate("cropId");
+
+    if (!schedule) {
+      return res.status(404).json({ message: "Schedule not found" });
+    }
+
+    res.status(200).json(schedule);
+  } catch (error) {
+    console.error("Error fetching schedule by ID:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;

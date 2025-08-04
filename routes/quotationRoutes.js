@@ -3,14 +3,26 @@ const router = express.Router();
 const Quotation = require("../models/Quotation");
 
 // Create new quotation
-// router.post("/", async (req, res) => {
-//   try {
-//     const newQuotation = await Quotation.create(req.body);
-//     res.status(201).json(newQuotation);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to create quotation" });
-//   }
-// });
+router.post("/", async (req, res) => {
+  try {
+    const newQuotation = await Quotation.create(req.body);
+    res.status(201).json(newQuotation);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create quotation" });
+  }
+});
+
+// Get quotation by ID
+router.get("/:id", async (req, res) => {
+  try {
+    console.log("id ");
+
+    const quotation = await Quotation.findById(req.params.id);
+    res.status(200).json(quotation);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch quotation" });
+  }
+});
 
 // Get all quotations
 router.get("/", async (req, res) => {
@@ -19,16 +31,6 @@ router.get("/", async (req, res) => {
     res.status(200).json(quotations);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch quotations" });
-  }
-});
-
-// Get quotation by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const quotation = await Quotation.findById(req.params.id);
-    res.status(200).json(quotation);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch quotation" });
   }
 });
 
