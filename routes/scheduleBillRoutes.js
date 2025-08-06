@@ -7,8 +7,6 @@ const router = express.Router();
 
 router.get("/:scheduleId", async (req, res) => {
   try {
-    console.log("get jlaskf");
-
     const bill = await ScheduleBill.findOne({ scheduleId: req.params.scheduleId });
     if (!bill) return res.status(404).json({ message: "No bill found" });
     res.status(200).json(bill);

@@ -7,6 +7,11 @@ const quotationSchema = new mongoose.Schema(
       ref: "Crop",
       required: true,
     },
+    scheduleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Schedule",
+      required: true,
+    },
     cropName: String,
     acres: Number,
     weeks: [
@@ -25,6 +30,7 @@ const quotationSchema = new mongoose.Schema(
           {
             name: String,
             quantity: String,
+            perLitreMix: String,
           },
         ],
       },

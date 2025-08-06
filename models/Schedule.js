@@ -21,6 +21,7 @@ const scheduleSchema = new mongoose.Schema({
         {
           name: String,
           quantity: String,
+          perLitreMix: String,
         },
       ],
       instructions: String,

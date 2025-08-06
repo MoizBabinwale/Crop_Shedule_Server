@@ -15,8 +15,6 @@ router.post("/", async (req, res) => {
 // Get quotation by ID
 router.get("/:id", async (req, res) => {
   try {
-    console.log("id ");
-
     const quotation = await Quotation.findById(req.params.id);
     res.status(200).json(quotation);
   } catch (err) {

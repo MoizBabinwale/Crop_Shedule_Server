@@ -1,17 +1,68 @@
+const Quotation = require("../models/Quotation");
 const QuotationBill = require("../models/QuotationBill");
 
 const express = require("express");
+const ScheduleBill = require("../models/ScheduleBill");
 const router = express.Router();
 
-router.post("/create", async (req, res) => {
+router.post("/:quotationId/:acres", async (req, res) => {
   try {
-    console.log("req.body ", req.body);
+    const { quotationId, acres } = req.params;
+    console.log(" quotationId, acres  ", req.params);
 
-    const newBill = new QuotationBill(req.body);
-    const saved = await newBill.save();
-    res.status(201).json(saved._id);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to save quotation bill" });
+    const quotation = await Quotation.findById(quotationId);
+    if (!quotation) return res.status(404).json({ message: "Quotation not found" });
+
+    const scheduleId = quotation.scheduleId;
+    const scheduleBill = await ScheduleBill.findOne({ scheduleId });
+    if (!scheduleBill) return res.status(404).json({ message: "Schedule Bill not found" });
+
+    // Multiply the items
+    const multipliedItems = scheduleBill.items.map((item) => ({
+      name: item.name,
+      times: item.times,
+      totalMl: item.totalMl * acres,
+      ltrKg: item.ltrKg * acres,
+      rate: item.rate,
+      totalAmt: item.totalAmt * acres,
+    }));
+
+    // Multiply the cost info
+    const multiplyCost = (costObj) => ({
+      totalRs: (costObj.totalRs || 0) * acres,
+      perHectare: costObj.perHectare,
+      perAcre: costObj.perAcre,
+      perBigha: costObj.perBigha,
+      perGuntha: costObj.perGuntha,
+    });
+
+    const newQuotationBill = new QuotationBill({
+      quotationId: quotation._id,
+      scheduleId: scheduleBill.scheduleId,
+      cropId: scheduleBill.cropId,
+      cropName: scheduleBill.cropName,
+      billDate: new Date(),
+      acres: Number(acres),
+      items: multipliedItems,
+      additionalInfo: {
+        totalPlants: (scheduleBill.additionalInfo.totalPlants || 0) * acres,
+        totalAcres: Number(acres),
+        totalGuntha: (scheduleBill.additionalInfo.totalGuntha || 0) * acres,
+        totalCost: (scheduleBill.additionalInfo.totalCost || 0) * acres,
+        perPlantCost: scheduleBill.additionalInfo.perPlantCost || 0,
+        leafProductCost: multiplyCost(scheduleBill.additionalInfo.leafProductCost),
+        bioControlCost: multiplyCost(scheduleBill.additionalInfo.bioControlCost),
+        fieldInputPrepCost: multiplyCost(scheduleBill.additionalInfo.fieldInputPrepCost),
+        smokeCost: multiplyCost(scheduleBill.additionalInfo.smokeCost),
+      },
+      farmerInfo: quotation.farmerInfo,
+    });
+
+    await newQuotationBill.save();
+    return res.status(201).json({ message: "Quotation bill created", bill: newQuotationBill });
+  } catch (error) {
+    console.error("Error creating quotation bill:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 

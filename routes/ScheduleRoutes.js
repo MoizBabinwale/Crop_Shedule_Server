@@ -31,6 +31,7 @@ router.post("/create/:cropId", async (req, res) => {
 
     if (existing) {
       // Update the existing schedule's weeks
+
       existing.weeks = weeks;
       const updated = await existing.save();
       return res.status(200).json({ message: "Schedule updated", data: updated });
