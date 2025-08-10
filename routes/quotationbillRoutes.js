@@ -3,30 +3,57 @@ const QuotationBill = require("../models/QuotationBill");
 
 const express = require("express");
 const ScheduleBill = require("../models/ScheduleBill");
+const Schedule = require("../models/Schedule");
 const router = express.Router();
 
 router.post("/:quotationId/:acres", async (req, res) => {
   try {
     const { quotationId, acres } = req.params;
-    console.log(" quotationId, acres  ", req.params);
 
     const quotation = await Quotation.findById(quotationId);
     if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
     const scheduleId = quotation.scheduleId;
+    const scheduleData = await Schedule.findById(scheduleId);
     const scheduleBill = await ScheduleBill.findOne({ scheduleId });
     if (!scheduleBill) return res.status(404).json({ message: "Schedule Bill not found" });
+    const productStats = {};
 
-    // Multiply the items
-    const multipliedItems = scheduleBill.items.map((item) => ({
-      name: item.name,
-      times: item.times,
-      totalMl: item.totalMl * acres,
-      ltrKg: item.ltrKg * acres,
-      rate: item.rate,
-      totalAmt: item.totalAmt * acres,
-    }));
+    // Loop through weeks
+    scheduleData.weeks.forEach((week) => {
+      week.products.forEach((product) => {
+        const { name, quantity } = product;
 
+        if (!productStats[name]) {
+          productStats[name] = { times: 0, totalMl: 0, ltrKg: 0 };
+        }
+
+        // Increment times
+        productStats[name].times += 1;
+
+        // Extract ml/g
+        const matchMl = quantity?.match(/([\d.]+)\s*ml\/g/i);
+        if (matchMl) productStats[name].totalMl += parseFloat(matchMl[1]);
+
+        // Extract l/kg
+        const matchLtr = quantity?.match(/([\d.]+)\s*l\/kg/i);
+        if (matchLtr) productStats[name].ltrKg += parseFloat(matchLtr[1]);
+      });
+    });
+
+    // Multiply for acres & match rates from ScheduleBill
+    const multipliedItems = Object.keys(productStats).map((name) => {
+      const matchingBillItem = scheduleBill.items.find((i) => i.name === name);
+
+      return {
+        name,
+        times: productStats[name].times,
+        totalMl: productStats[name].totalMl * acres,
+        ltrKg: productStats[name].ltrKg * acres,
+        rate: matchingBillItem?.rate || 0,
+        totalAmt: (matchingBillItem?.rate || 0) * (productStats[name].totalMl * acres), // example calc
+      };
+    });
     // Multiply the cost info
     const multiplyCost = (costObj) => ({
       totalRs: (costObj.totalRs || 0) * acres,

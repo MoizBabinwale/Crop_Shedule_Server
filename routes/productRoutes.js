@@ -6,14 +6,29 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, pricePerAcre } = req.body;
+
+    // Validate product name
     if (!name || name.trim() === "") {
       return res.status(400).json({ error: "Product name is required" });
     }
 
-    const newProduct = new Product({ name: name.trim() });
-    const savedProduct = await newProduct.save();
+    // Validate price
+    if (pricePerAcre === undefined || pricePerAcre === null || isNaN(pricePerAcre)) {
+      return res.status(400).json({ error: "Price per acre is required and must be a number" });
+    }
 
+    if (pricePerAcre < 0) {
+      return res.status(400).json({ error: "Price per acre cannot be negative" });
+    }
+
+    // Save to DB
+    const newProduct = new Product({
+      name: name.trim(),
+      pricePerAcre: Number(pricePerAcre), // store as number
+    });
+
+    const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
     console.error("Error adding product:", error);

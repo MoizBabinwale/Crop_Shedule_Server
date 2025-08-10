@@ -31,6 +31,7 @@ const quotationSchema = new mongoose.Schema(
             name: String,
             quantity: String,
             perLitreMix: String,
+            price: Number,
           },
         ],
       },

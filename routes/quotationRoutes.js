@@ -8,7 +8,16 @@ router.post("/", async (req, res) => {
     const newQuotation = await Quotation.create(req.body);
     res.status(201).json(newQuotation);
   } catch (err) {
-    res.status(500).json({ error: "Failed to create quotation" });
+    // console.error("Quotation creation error:", err);
+
+    // If it's a Mongoose validation error
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ message: messages.join(", ") });
+    }
+
+    // For other errors
+    res.status(500).json({ message: err.message || "Server error" });
   }
 });
 

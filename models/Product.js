@@ -6,6 +6,11 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  pricePerAcre: {
+    type: Number,
+    required: true,
+    min: 0, // Price can't be negative
+  },
 });
 
 const Product = mongoose.model("Product", productSchema);
