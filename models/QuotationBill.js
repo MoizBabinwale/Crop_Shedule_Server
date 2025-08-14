@@ -16,6 +16,7 @@ const QuotationBillSchema = new mongoose.Schema(
         ltrKg: Number,
         rate: Number,
         totalAmt: Number,
+        category: String,
       },
     ],
     additionalInfo: {

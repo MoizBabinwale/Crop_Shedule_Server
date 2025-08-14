@@ -51,7 +51,7 @@ router.post("/:quotationId/:acres", async (req, res) => {
         totalMl: productStats[name].totalMl * acres,
         ltrKg: productStats[name].ltrKg * acres,
         rate: matchingBillItem?.rate || 0,
-        totalAmt: (matchingBillItem?.rate || 0) * (productStats[name].totalMl * acres), // example calc
+        totalAmt: matchingBillItem.totalAmt * acres, // example calc
       };
     });
     // Multiply the cost info
