@@ -17,6 +17,7 @@ const scheduleSchema = new mongoose.Schema({
       productAmountMg: String,
       productAmountLtr: String,
       useStartDay: String,
+
       products: [
         {
           name: String,
@@ -31,6 +32,7 @@ const scheduleSchema = new mongoose.Schema({
       instructions: String,
     },
   ],
+  totalPlants: Number,
 
   scheduleBillId: {
     type: mongoose.Schema.Types.ObjectId,

@@ -24,7 +24,8 @@ router.get("/get/:cropId", async (req, res) => {
 router.post("/create/:cropId", async (req, res) => {
   try {
     const cropId = req.params.cropId;
-    const { weeks } = req.body;
+
+    const { weeks, totalPlants } = req.body;
 
     // Check if schedule already exists
     const existing = await Schedule.findOne({ cropId });
@@ -33,6 +34,7 @@ router.post("/create/:cropId", async (req, res) => {
       // Update the existing schedule's weeks
 
       existing.weeks = weeks;
+      existing.totalPlants = totalPlants;
       const updated = await existing.save();
       return res.status(200).json({ message: "Schedule updated", data: updated });
     }
