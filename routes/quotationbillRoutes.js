@@ -31,12 +31,12 @@ router.post("/:quotationId/:acres", async (req, res) => {
         // Increment times
         productStats[name].times += 1;
 
-        // Extract ml/g
+        // Extract ml/grm
         const matchMl = quantity?.match(/([\d.]+)\s*ml\/g/i);
         if (matchMl) productStats[name].totalMl += parseFloat(matchMl[1]);
 
-        // Extract l/kg
-        const matchLtr = quantity?.match(/([\d.]+)\s*l\/kg/i);
+        // Extract ltr/kg
+        const matchLtr = quantity?.match(/([\d.]+)\s*(?:ltr|l)\/kg/i);
         if (matchLtr) productStats[name].ltrKg += parseFloat(matchLtr[1]);
       });
     });
