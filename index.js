@@ -14,12 +14,14 @@ const productRoutes = require("./routes/productRoutes.js");
 const quotationbillRoutes = require("./routes/quotationbillRoutes.js");
 const quotationRoutes = require("./routes/quotationRoutes.js");
 const scheduleBillRoutes = require("./routes/scheduleBillRoutes.js");
+const instructionRoutes = require("./routes/instructionRoutes.js");
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/crop", cropRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/quotationbills", quotationbillRoutes);
 app.use("/api/quotations", quotationRoutes);
 app.use("/api/schedulebill", scheduleBillRoutes);
+app.use("/api/instructions", instructionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is up and running!");
