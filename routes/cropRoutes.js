@@ -7,8 +7,8 @@ const Quotation = require("../models/Quotation");
 // POST - Add new crop
 router.post("/add", async (req, res) => {
   try {
-    const { name, description, weeks } = req.body;
-    const newCrop = new Crop({ name, description, weeks });
+    const { name, description, weeks, weekInterval } = req.body;
+    const newCrop = new Crop({ name, description, weeks, weekInterval });
     await newCrop.save();
     res.status(201).json({ message: "Crop added successfully", newCrop });
   } catch (error) {

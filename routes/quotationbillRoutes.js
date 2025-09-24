@@ -6,10 +6,11 @@ const ScheduleBill = require("../models/ScheduleBill");
 const Schedule = require("../models/Schedule");
 const router = express.Router();
 
+const Product = require("../models/Product");
+
 router.post("/:quotationId/:acres", async (req, res) => {
   try {
     const { quotationId, acres } = req.params;
-
     const quotation = await Quotation.findById(quotationId);
     if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
@@ -22,7 +23,7 @@ router.post("/:quotationId/:acres", async (req, res) => {
     // Loop through weeks
     scheduleData.weeks.forEach((week) => {
       week.products.forEach((product) => {
-        const { name, quantity } = product;
+        const { name, quantity, bottlePerml } = product;
 
         if (!productStats[name]) {
           productStats[name] = { times: 0, totalMl: 0, ltrKg: 0 };
@@ -30,6 +31,7 @@ router.post("/:quotationId/:acres", async (req, res) => {
 
         // Increment times
         productStats[name].times += 1;
+        productStats[name].bottlePerml = bottlePerml;
 
         // Extract ml/grm
         const matchMl = quantity?.match(/([\d.]+)\s*ml\/g/i);
@@ -41,9 +43,27 @@ router.post("/:quotationId/:acres", async (req, res) => {
       });
     });
 
+    const productNames = Object.keys(productStats);
+
+    // Fetch products from DB (all at once instead of inside the loop)
+    const productsFromDb = await Product.find({ name: { $in: productNames } });
+
+    // Create a lookup map for fast access
+    const productMap = {};
+    productsFromDb.forEach((p) => {
+      productMap[p.name] = p;
+    });
+    let missingItem = null;
     // Multiply for acres & match rates from ScheduleBill
     const multipliedItems = Object.keys(productStats).map((name) => {
       const matchingBillItem = scheduleBill.items.find((i) => i.name === name);
+
+      if (!matchingBillItem) {
+        missingItem = name; // mark missing but don't return res here
+        return null;
+      }
+
+      const productDoc = productMap[name];
 
       return {
         name,
@@ -52,8 +72,13 @@ router.post("/:quotationId/:acres", async (req, res) => {
         ltrKg: productStats[name].ltrKg * acres,
         rate: matchingBillItem?.rate || 0,
         totalAmt: matchingBillItem.totalAmt * acres, // example calc
+        bottlePerml: productDoc?.bottlePerml || 0,
       };
     });
+    // If any product was missing → stop here safely
+    if (missingItem) {
+      return res.status(404).json({ message: `Schedule Bill item not found for product: ${missingItem}` });
+    }
     // Multiply the cost info
     const multiplyCost = (costObj) => ({
       totalRs: (costObj.totalRs || 0) * acres,

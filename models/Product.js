@@ -17,6 +17,7 @@ const productSchema = new mongoose.Schema({
     min: 0, // Price can't be negative
   },
   rate: { type: Number, required: true, min: 0 },
+  bottlePerml: { type: Number, min: 0 },
 });
 
 const Product = mongoose.model("Product", productSchema);

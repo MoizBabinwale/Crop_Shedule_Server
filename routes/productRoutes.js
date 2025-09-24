@@ -6,7 +6,9 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { name, pricePerAcre, category, rate } = req.body;
+    console.log("req.body ", req.body);
+
+    const { name, pricePerAcre, category, rate, bottlePerml } = req.body;
 
     // Validate product name
     if (!name || name.trim() === "") {
@@ -32,6 +34,7 @@ router.post("/", async (req, res) => {
       // instruction: instruction.trim(),
       category,
       rate,
+      bottlePerml,
     });
 
     const savedProduct = await newProduct.save();
